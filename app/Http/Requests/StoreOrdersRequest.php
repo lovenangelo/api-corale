@@ -22,17 +22,17 @@ class StoreOrdersRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'user_id' => 'required|nullable',
+      'user_id' => 'integer|nullable',
       'payment_method' => 'required|string|max:255',
       'total_amount' => 'required|numeric|min:0',
 
       'order_items' => 'required|array',
-      'order_items.*.product_id' => 'required|integer|exists:products,id',
-      'order_items.*.cart_item_id' => 'required|integer|exists:cart_items,id',
+      'order_items.*.product_id' => 'required|integer',
+      'order_items.*.cart_item_id' => 'required|integer',
       'order_items.*.quantity' => 'required|integer|min:1',
       'order_items.*.price' => 'required|numeric|min:0',
 
-      'order_address_id' => 'required|integer|exists:order_addresses,id',
+      'order_address_id' => 'nullable|integer',
     ];
   }
 }

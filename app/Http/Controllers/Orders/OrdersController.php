@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrdersRequest;
 use App\Models\CartItem;
 use App\Models\Order;
+use App\Models\OrderAddress;
 use App\Models\OrderItem;
 
 class OrdersController extends Controller
@@ -20,7 +21,6 @@ class OrdersController extends Controller
     $orders = Order::where('user_id', $userId)
       ->select('created_at as date', 'total_amount as price', 'id as order_id', 'status', 'transaction_number')
       ->get();
-
     return response()->json($orders);
   }
 
@@ -33,9 +33,26 @@ class OrdersController extends Controller
 
     // Generate a unique transaction number
     $transactionNumber = uniqid('TXN', true);
+    clock($validatedData);
+    $orderAddressId = null;
+    if ($validatedData['user_id'] == null) {
+      $address = $request->only(
+        [
+          'fullname',
+          'mobile_number',
+          'street_address',
+          'city',
+          'state',
+          'zip_code'
+        ]
+      );
 
-    // Create the OrderAddress
-    $orderAddressId = $validatedData['order_address_id'];
+      $orderAddress = OrderAddress::create([...$address, 'user_id' => null]);
+      $orderAddressId = $orderAddress->id;
+    } else {
+      // Create the OrderAddress
+      $orderAddressId = $validatedData['order_address_id'];
+    }
 
     // Create the Order
     $order = Order::create([
